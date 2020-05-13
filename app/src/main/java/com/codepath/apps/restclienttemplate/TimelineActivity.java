@@ -66,7 +66,7 @@ public class TimelineActivity extends AppCompatActivity {
             }
         });
 
-        //find the recyclrt view
+        //find the recycler view
         rvTweets = findViewById(R.id.rvTweets);
         //Init the list of tweets and dapter
         tweets = new ArrayList<>();
@@ -103,6 +103,13 @@ public class TimelineActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main,menu);
+        return super.onCreateOptionsMenu(menu);
+
+    }
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId() ==R.id.compose) {
             // Compose icon has been selected
@@ -127,14 +134,6 @@ public class TimelineActivity extends AppCompatActivity {
             rvTweets.smoothScrollToPosition(0);
         }
         super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main,menu);
-        return true;
-
     }
 
     private void loadMoreData() {
@@ -171,7 +170,7 @@ public class TimelineActivity extends AppCompatActivity {
                 Log.i(TAG, "onSuccess!" +json.toString());
                 JSONArray jsonArray = json.jsonArray;
                 try {
-                    final List<Tweet> tweetsFromNetwork = fromJsonArray(jsonArray);
+                    final List<Tweet> tweetsFromNetwork = Tweet.fromJsonArray(jsonArray);
                     adapter.clear();
                     adapter.addAll(tweetsFromNetwork);
                     // Now we call setRefreshing(false) to signal refresh has finished
@@ -180,15 +179,15 @@ public class TimelineActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             Log.i(TAG, "Saving data into database");
-                            List<User> usersFromNetwork  = User. fromJsonTweetArray(tweetsFromNetwork);
-                            tweetDao.insertModel(usersFromNetwork.toArray(new User [0]));
                             //insert users first
-
+                            List<User> usersFromNetwork  = User.fromJsonTweetArray(tweetsFromNetwork);
+                            tweetDao.insertModel(usersFromNetwork.toArray(new User [0]));
                             //insert tweets next
                             tweetDao.insertModel(tweetsFromNetwork.toArray(new Tweet[0]));
                         }
                     });
 
+                    tweets.addAll(Tweet.fromJsonArray((jsonArray)));
                     adapter.notifyDataSetChanged();
                 } catch (JSONException e) {
                     Log.e(TAG, "Json exception", e);
